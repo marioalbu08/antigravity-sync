@@ -37,38 +37,66 @@ def inject_markdown_conversation(md_path, db_path=None):
     
     print(f"Parsing {md_path}...")
     
-    # Super basic MD parser: treats alternating sections as User/Model
-    # In a real app, you might look for "**User:**" or similar headings.
+    # Smart markdown parser: detects conversation turns by common patterns
     with open(md_path, 'r', encoding='utf-8') as f:
         content = f.read()
-        
-    # We will just split by a common heuristic or chunk it.
-    # For now, if there is no explicit parsing, we just inject it as one big user request + model response
-    # to guarantee it works.
+    
+    # Common speaker markers used by ChatGPT, Claude, and manual exports
+    import re
+    turn_pattern = re.compile(
+        r'^(?:\*\*|#{1,3}\s*)?(User|Human|You|Assistant|Claude|ChatGPT|AI|System|Model)[\s:*]*',
+        re.IGNORECASE | re.MULTILINE
+    )
+    
+    matches = list(turn_pattern.finditer(content))
     steps = []
+    now = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     
-    # Dummy user step
-    user_step = {
-        "step_index": 0,
-        "source": "USER_EXPLICIT",
-        "type": "USER_INPUT",
-        "status": "DONE",
-        "created_at": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
-        "content": f"<USER_REQUEST>\n{title}\n</USER_REQUEST>"
-    }
-    steps.append(user_step)
+    if matches:
+        # We found structured turns — parse them properly
+        for i, match in enumerate(matches):
+            start = match.end()
+            end = matches[i + 1].start() if i + 1 < len(matches) else len(content)
+            text = content[start:end].strip()
+            
+            speaker = match.group(1).lower()
+            is_user = speaker in ('user', 'human', 'you')
+            
+            step = {
+                "step_index": i,
+                "source": "USER_EXPLICIT" if is_user else "MODEL",
+                "type": "USER_INPUT" if is_user else "PLANNER_RESPONSE",
+                "status": "DONE",
+                "created_at": now,
+                "content": f"<USER_REQUEST>\n{text}\n</USER_REQUEST>" if is_user else text
+            }
+            steps.append(step)
+    else:
+        # No structured turns found — fall back to treating it as a single exchange
+        steps = [
+            {
+                "step_index": 0,
+                "source": "USER_EXPLICIT",
+                "type": "USER_INPUT",
+                "status": "DONE",
+                "created_at": now,
+                "content": f"<USER_REQUEST>\n{title}\n</USER_REQUEST>"
+            },
+            {
+                "step_index": 1,
+                "source": "MODEL",
+                "type": "PLANNER_RESPONSE",
+                "status": "DONE",
+                "created_at": now,
+                "content": content
+            }
+        ]
     
-    # Model response step
-    model_step = {
-        "step_index": 1,
-        "source": "MODEL",
-        "type": "PLANNER_RESPONSE",
-        "status": "DONE",
-        "created_at": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
-        "content": content
-    }
-    steps.append(model_step)
+    if not steps:
+        print("Warning: No conversation content found in the file.")
+        return
     
+    print(f"  Detected {len(steps)} conversation turns.")
     print(f"Writing synthetic transcript to {transcript_path}")
     with open(transcript_path, 'w', encoding='utf-8') as f:
         for step in steps:
