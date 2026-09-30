@@ -5,13 +5,13 @@ import argparse
 import sys
 import time
 from .core import sync_conversations
-from .utils import wait_for_ide_close, is_ide_running, get_ide_db_path, get_desktop_db_path
+from .utils import wait_for_ide_close, is_ide_running, get_ide_db_path, get_desktop_db_path, green, red, yellow, cyan, bold
 from .injector import inject_markdown_conversation
 
 def print_banner():
-    print("=" * 60)
-    print("     Antigravity Chat History Restorer & Sync Tool     ")
-    print("=" * 60)
+    print(cyan("=" * 60))
+    print(bold("     Antigravity Chat History Restorer & Sync Tool     "))
+    print(cyan("=" * 60))
 
 def main():
     parser = argparse.ArgumentParser(description="Sync and restore missing Antigravity chat histories.")

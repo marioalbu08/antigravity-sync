@@ -6,6 +6,21 @@ import time
 import subprocess
 import json
 
+# --- Terminal Colors ---
+def _supports_color():
+    """Check if the terminal supports ANSI color codes."""
+    if sys.platform == 'win32':
+        return os.environ.get('TERM') or os.environ.get('WT_SESSION') or hasattr(sys.stderr, 'isatty') and sys.stderr.isatty()
+    return hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+
+_COLOR = _supports_color()
+
+def green(text):  return f"\033[92m{text}\033[0m" if _COLOR else text
+def red(text):    return f"\033[91m{text}\033[0m" if _COLOR else text
+def yellow(text): return f"\033[93m{text}\033[0m" if _COLOR else text
+def cyan(text):   return f"\033[96m{text}\033[0m" if _COLOR else text
+def bold(text):   return f"\033[1m{text}\033[0m" if _COLOR else text
+
 def get_ide_db_path():
     """Finds the Antigravity IDE SQLite state database on any OS."""
     home = os.path.expanduser('~')
