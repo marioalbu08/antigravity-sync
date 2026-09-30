@@ -10,7 +10,7 @@
 
 If you discover a security vulnerability in Antigravity Sync, please **do not** open a public GitHub Issue.
 
-Instead, please report it privately by emailing: **security@example.com**
+Instead, please report it privately by emailing: **aalexandru29matei@gmail.com**
 
 You can expect:
 - An acknowledgement within **48 hours**
