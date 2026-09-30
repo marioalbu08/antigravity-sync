@@ -22,27 +22,27 @@ def main():
     args = parser.parse_args()
     print_banner()
     
-    if args.inject:
-        inject_markdown_conversation(args.inject)
-        return
-
-    if args.watch:
+    if not args.watch:
+        if is_ide_running(args.sync_desktop):
+            app_name = "Antigravity Desktop App" if args.sync_desktop else "Antigravity IDE"
+            print(f"\n[!] WARNING: {app_name} is currently running!")
+            print(f"Modifying the database while {app_name} is open will result in changes being OVERWRITTEN when it closes.")
+            choice = input("Do you want to wait for it to close? (Y/n): ").strip().lower()
+            if choice != 'n':
+                wait_for_ide_close(args.sync_desktop)
+            else:
+                print("Proceeding anyway, but changes may be lost.")
+    elif args.watch:
         print("Watcher mode activated.")
-        wait_for_ide_close()
-        db_path = get_desktop_db_path() if args.sync_desktop else get_ide_db_path()
-        sync_conversations(db_path=db_path, dry_run=args.dry_run, no_backup=args.no_backup)
+        wait_for_ide_close(args.sync_desktop)
+        
+    db_path = get_desktop_db_path() if args.sync_desktop else get_ide_db_path()
+
+    if args.inject:
+        # Pass the correct db_path to the injector so it supports --sync-desktop
+        inject_markdown_conversation(args.inject, db_path=db_path)
         return
 
-    if is_ide_running():
-        print("\n[!] WARNING: Antigravity IDE is currently running!")
-        print("Modifying the database while the IDE is open will result in changes being OVERWRITTEN when it closes.")
-        choice = input("Do you want to wait for it to close? (Y/n): ").strip().lower()
-        if choice != 'n':
-            wait_for_ide_close()
-        else:
-            print("Proceeding anyway, but changes may be lost.")
-            
-    db_path = get_desktop_db_path() if args.sync_desktop else get_ide_db_path()
     sync_conversations(db_path=db_path, dry_run=args.dry_run, no_backup=args.no_backup)
 
 if __name__ == '__main__':

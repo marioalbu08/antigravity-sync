@@ -37,29 +37,32 @@ def get_brain_dirs():
     ]
     return [d for d in dirs if os.path.exists(d)]
 
-def is_ide_running():
-    """Checks if Antigravity IDE is currently running."""
-    # We check for Code.exe or Antigravity processes
+def is_ide_running(check_desktop=False):
+    """Checks if Antigravity IDE (or Desktop App) is currently running."""
+    proc_name = "Antigravity.exe" if check_desktop else "Antigravity IDE.exe"
+    proc_grep = "Antigravity" if check_desktop else "Antigravity IDE"
+    
     try:
         if sys.platform == 'win32':
-            output = subprocess.check_output('tasklist /FI "IMAGENAME eq Antigravity IDE.exe"', shell=True, text=True)
-            if 'Antigravity IDE.exe' in output:
+            output = subprocess.check_output(f'tasklist /FI "IMAGENAME eq {proc_name}"', shell=True, text=True)
+            if proc_name in output:
                 return True
         else:
-            output = subprocess.check_output('pgrep -f "Antigravity IDE"', shell=True, text=True)
+            output = subprocess.check_output(f'pgrep -f "{proc_grep}"', shell=True, text=True)
             if output.strip():
                 return True
     except Exception:
         pass
     return False
 
-def wait_for_ide_close():
-    """Blocks until Antigravity IDE is closed."""
-    if is_ide_running():
-        print("Antigravity IDE is currently running. Waiting for it to close...")
-        while is_ide_running():
+def wait_for_ide_close(check_desktop=False):
+    """Blocks until Antigravity IDE (or Desktop App) is closed."""
+    app_name = "Antigravity Desktop App" if check_desktop else "Antigravity IDE"
+    if is_ide_running(check_desktop):
+        print(f"{app_name} is currently running. Waiting for it to close...")
+        while is_ide_running(check_desktop):
             time.sleep(2)
-        print("IDE closed! Proceeding...")
+        print(f"{app_name} closed! Proceeding...")
         time.sleep(1) # Give SQLite a moment to release locks
 
 def backup_db(db_path):

@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from .core import sync_conversations
 from .utils import get_brain_dirs
 
-def inject_markdown_conversation(md_path):
+def inject_markdown_conversation(md_path, db_path=None):
     """
     Parses a simple markdown file (e.g. from ChatGPT or Claude) and creates a 
     synthetic Antigravity transcript, then automatically syncs it into the IDE.
@@ -75,5 +75,5 @@ def inject_markdown_conversation(md_path):
             f.write(json.dumps(step) + '\n')
             
     print("Injection complete. Syncing database...")
-    sync_conversations(dry_run=False)
+    sync_conversations(db_path=db_path, dry_run=False)
     print(f"Success! Imported '{title}' as {cid}. Open Antigravity IDE to view it!")
