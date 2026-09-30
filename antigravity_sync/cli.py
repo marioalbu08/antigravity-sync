@@ -42,6 +42,19 @@ def main():
     db_path = get_desktop_db_path() if args.sync_desktop else get_ide_db_path()
 
     if args.inject:
+        import os
+        if not os.path.exists(args.inject):
+            print(f"Error: File not found: {args.inject}")
+            sys.exit(1)
+        if not args.inject.lower().endswith('.md'):
+            print(f"Warning: '{args.inject}' does not have a .md extension. Proceeding anyway...")
+        file_size = os.path.getsize(args.inject)
+        if file_size > 10 * 1024 * 1024:  # 10MB limit
+            print(f"Error: File is too large ({file_size // 1024 // 1024}MB). Maximum is 10MB.")
+            sys.exit(1)
+        if file_size == 0:
+            print("Error: File is empty.")
+            sys.exit(1)
         # Pass the correct db_path to the injector so it supports --sync-desktop
         inject_markdown_conversation(args.inject, db_path=db_path)
         return
