@@ -23,10 +23,14 @@ var/
 *.backup_*
 *.backup
 
-# Virtual environments
+# Virtual environments & IDE
 venv/
 .venv/
 ENV/
+.env
+.env.local
+.vscode/
+.idea/
 
 # Scratch and test files
 scratch/

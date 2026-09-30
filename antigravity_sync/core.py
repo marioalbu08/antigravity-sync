@@ -29,7 +29,7 @@ def parse_transcript_metadata(t_path):
                         clean_ts = step['created_at'].replace('Z', '').split('.')[0]
                         dt = datetime.strptime(clean_ts, '%Y-%m-%dT%H:%M:%S')
                         created_ts = int(dt.timestamp())
-                    except:
+                    except Exception:
                         pass
                         
                 # Get title from first user request
@@ -43,7 +43,7 @@ def parse_transcript_metadata(t_path):
                     clean_ts = step['created_at'].replace('Z', '').split('.')[0]
                     dt = datetime.strptime(clean_ts, '%Y-%m-%dT%H:%M:%S')
                     updated_ts = int(dt.timestamp())
-                except:
+                except Exception:
                     pass
     except Exception as e:
         print(f"Error parsing {t_path}: {e}")

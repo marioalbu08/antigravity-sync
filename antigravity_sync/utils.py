@@ -49,7 +49,7 @@ def is_ide_running():
             output = subprocess.check_output('pgrep -f "Antigravity IDE"', shell=True, text=True)
             if output.strip():
                 return True
-    except:
+    except Exception:
         pass
     return False
 
