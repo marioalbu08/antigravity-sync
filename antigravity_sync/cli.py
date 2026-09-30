@@ -1,4 +1,6 @@
 # antigravity_sync/cli.py
+__version__ = '1.0.0'
+
 import argparse
 import sys
 import time
@@ -18,6 +20,7 @@ def main():
     parser.add_argument('--no-backup', action='store_true', help='Skip creating a .vscdb backup.')
     parser.add_argument('--inject', type=str, help='Path to a Markdown file to inject as a conversation.')
     parser.add_argument('--sync-desktop', action='store_true', help='Target Desktop App database instead of IDE.')
+    parser.add_argument('--version', action='version', version=f'%(prog)s {__version__}')
     
     args = parser.parse_args()
     print_banner()
